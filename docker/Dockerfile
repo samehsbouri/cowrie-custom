@@ -99,6 +99,10 @@ COPY --from=builder --chown=0:0 /etc/passwd /etc/group /etc/
 
 COPY --from=builder --chown=${COWRIE_USER}:${COWRIE_GROUP} ${COWRIE_HOME} ${COWRIE_HOME}
 
+# Create required directories at build time (distroless has no shell for runtime mkdir)
+RUN mkdir -p /cowrie/cowrie-git/var/log/cowrie /cowrie/cowrie-git/var/lib/cowrie/tty /cowrie/cowrie-git/var/lib/cowrie/downloads && \
+    chown -R ${COWRIE_USER}:${COWRIE_GROUP} /cowrie/cowrie-git/var
+
 RUN [ "python3", "-m", "compileall", "-q", "/cowrie/cowrie-git/src", "/cowrie/cowrie-env/", "/usr/lib/python3.13"]
 
 VOLUME [ "/cowrie/cowrie-git/var", "/cowrie/cowrie-git/etc" ]
@@ -114,5 +118,6 @@ RUN [ "python3", "/cowrie/cowrie-git/bin/regen-dropin.cache" ]
 
 EXPOSE 2222 2223
 
-ENTRYPOINT [ "/cowrie/cowrie-env/bin/python3" ]
-CMD [ "/cowrie/cowrie-env/bin/twistd", "-n", "--umask=0022", "--pidfile=", "cowrie" ]
+# Distroless python3 image already has python3 as the entrypoint
+ENTRYPOINT ["python3"]
+CMD ["/cowrie/cowrie-env/bin/twistd", "-n", "--umask=0022", "--pidfile=", "cowrie"]
