@@ -103,7 +103,7 @@ COPY --from=builder --chown=0:0 /etc/passwd /etc/group /etc/
 #    ln -s /usr/bin/python3 /usr/local/bin/python
 
 COPY --from=builder --chown=${COWRIE_USER}:${COWRIE_GROUP} ${COWRIE_HOME} ${COWRIE_HOME}
-COPY --chown=${COWRIE_USER}:${COWRIE_GROUP} entrypoint.py /cowrie/entrypoint.py
+COPY --chown=${COWRIE_USER}:${COWRIE_GROUP} docker/entrypoint.py /cowrie/entrypoint.py
 
 RUN [ "python3", "-m", "compileall", "-q", "/cowrie/cowrie-git/src", "/cowrie/cowrie-env/", "/usr/lib/python3.13"]
 
