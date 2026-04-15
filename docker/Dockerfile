@@ -55,6 +55,11 @@ RUN python3 -m venv cowrie-env && \
 
 COPY --chown=${COWRIE_USER}:${COWRIE_GROUP} . ${COWRIE_HOME}/cowrie-git
 
+# Create required runtime directories (distroless runtime has no shell)
+RUN mkdir -p ${COWRIE_HOME}/cowrie-git/var/log/cowrie \
+    ${COWRIE_HOME}/cowrie-git/var/lib/cowrie/tty \
+    ${COWRIE_HOME}/cowrie-git/var/lib/cowrie/downloads
+
 RUN . cowrie-env/bin/activate && \
     export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_COWRIE=2.0.0 && \
     pip install --no-cache-dir -e ${COWRIE_HOME}/cowrie-git
@@ -98,10 +103,6 @@ COPY --from=builder --chown=0:0 /etc/passwd /etc/group /etc/
 #    ln -s /usr/bin/python3 /usr/local/bin/python
 
 COPY --from=builder --chown=${COWRIE_USER}:${COWRIE_GROUP} ${COWRIE_HOME} ${COWRIE_HOME}
-
-# Create required directories at build time (distroless has no shell for runtime mkdir)
-RUN mkdir -p /cowrie/cowrie-git/var/log/cowrie /cowrie/cowrie-git/var/lib/cowrie/tty /cowrie/cowrie-git/var/lib/cowrie/downloads && \
-    chown -R ${COWRIE_USER}:${COWRIE_GROUP} /cowrie/cowrie-git/var
 
 RUN [ "python3", "-m", "compileall", "-q", "/cowrie/cowrie-git/src", "/cowrie/cowrie-env/", "/usr/lib/python3.13"]
 
