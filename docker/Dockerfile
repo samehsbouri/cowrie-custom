@@ -55,6 +55,11 @@ RUN python3 -m venv cowrie-env && \
 
 COPY --chown=${COWRIE_USER}:${COWRIE_GROUP} . ${COWRIE_HOME}/cowrie-git
 
+# Create required runtime directories (distroless runtime has no shell)
+RUN mkdir -p ${COWRIE_HOME}/cowrie-git/var/log/cowrie \
+    ${COWRIE_HOME}/cowrie-git/var/lib/cowrie/tty \
+    ${COWRIE_HOME}/cowrie-git/var/lib/cowrie/downloads
+
 RUN . cowrie-env/bin/activate && \
     export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_COWRIE=2.0.0 && \
     pip install --no-cache-dir -e ${COWRIE_HOME}/cowrie-git
@@ -98,6 +103,7 @@ COPY --from=builder --chown=0:0 /etc/passwd /etc/group /etc/
 #    ln -s /usr/bin/python3 /usr/local/bin/python
 
 COPY --from=builder --chown=${COWRIE_USER}:${COWRIE_GROUP} ${COWRIE_HOME} ${COWRIE_HOME}
+COPY --chown=${COWRIE_USER}:${COWRIE_GROUP} docker/entrypoint.py /cowrie/entrypoint.py
 
 RUN [ "python3", "-m", "compileall", "-q", "/cowrie/cowrie-git/src", "/cowrie/cowrie-env/", "/usr/lib/python3.13"]
 
@@ -114,5 +120,6 @@ RUN [ "python3", "/cowrie/cowrie-git/bin/regen-dropin.cache" ]
 
 EXPOSE 2222 2223
 
-ENTRYPOINT [ "/cowrie/cowrie-env/bin/python3" ]
-CMD [ "/cowrie/cowrie-env/bin/twistd", "-n", "--umask=0022", "--pidfile=", "cowrie" ]
+# Entrypoint creates runtime dirs then execs twistd (distroless has no shell)
+ENTRYPOINT ["python3", "/cowrie/entrypoint.py"]
+CMD ["/cowrie/cowrie-env/bin/twistd", "-n", "--umask=0022", "--pidfile=", "cowrie"]
