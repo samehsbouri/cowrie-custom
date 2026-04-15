@@ -103,6 +103,7 @@ COPY --from=builder --chown=0:0 /etc/passwd /etc/group /etc/
 #    ln -s /usr/bin/python3 /usr/local/bin/python
 
 COPY --from=builder --chown=${COWRIE_USER}:${COWRIE_GROUP} ${COWRIE_HOME} ${COWRIE_HOME}
+COPY --chown=${COWRIE_USER}:${COWRIE_GROUP} entrypoint.py /cowrie/entrypoint.py
 
 RUN [ "python3", "-m", "compileall", "-q", "/cowrie/cowrie-git/src", "/cowrie/cowrie-env/", "/usr/lib/python3.13"]
 
@@ -119,6 +120,6 @@ RUN [ "python3", "/cowrie/cowrie-git/bin/regen-dropin.cache" ]
 
 EXPOSE 2222 2223
 
-# Distroless python3 image already has python3 as the entrypoint
-ENTRYPOINT ["python3"]
+# Entrypoint creates runtime dirs then execs twistd (distroless has no shell)
+ENTRYPOINT ["python3", "/cowrie/entrypoint.py"]
 CMD ["/cowrie/cowrie-env/bin/twistd", "-n", "--umask=0022", "--pidfile=", "cowrie"]
