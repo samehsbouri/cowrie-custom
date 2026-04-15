@@ -1,0 +1,11 @@
+127.0.0.1	localhost
+127.0.1.1	srv-tn.ttnet.tn	srv-tn
+10.0.0.1	gateway.ttnet.tn	gateway
+10.0.0.10	web1.tunisietelecom.tn	web1
+10.0.0.20	db1.tunisietelecom.tn	db1
+10.0.0.30	mail.tunisietelecom.tn	mail
+
+# The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
