@@ -2,6 +2,7 @@
 volumes:
   cowrie-etc:
   cowrie-var:
+  cowrie-log:
 
 services:
   cowrie:
@@ -15,3 +16,7 @@ services:
     volumes:
       - cowrie-etc:/cowrie/cowrie-git/etc
       - cowrie-var:/cowrie/cowrie-git/var
+      - cowrie-log:/cowrie/cowrie-git/var/log/cowrie
+    command: >
+      sh -c "mkdir -p /cowrie/cowrie-git/var/log/cowrie /cowrie/cowrie-git/var/lib/cowrie/tty /cowrie/cowrie-git/var/lib/cowrie/downloads &&
+             /cowrie/cowrie-env/bin/twistd -n --umask=0022 --pidfile= cowrie"
