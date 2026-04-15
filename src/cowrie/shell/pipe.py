@@ -182,9 +182,8 @@ class PipeProtocol:
             self.protocol.terminal.transport.session.id,
             re.sub("[^A-Za-z0-9]", "_", outfile),
         )
-        safeoutfile = os.path.join(
-            CowrieConfig.get("honeypot", "download_path"), tmp_fname
-        )
+        download_path = CowrieConfig.get("honeypot", "download_path")
+        safeoutfile = os.path.join(download_path, tmp_fname)
         perm = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
         try:
             self.protocol.fs.mkfile(
@@ -203,6 +202,10 @@ class PipeProtocol:
             self._emit_redirection_error(f"-bash: {outfile}: Permission denied\n")
             return None
 
+        try:
+            os.makedirs(download_path, exist_ok=True)
+        except OSError:
+            pass
         with open(safeoutfile, "ab"):
             self.protocol.fs.update_realfile(
                 self.protocol.fs.getfile(outfile), safeoutfile
